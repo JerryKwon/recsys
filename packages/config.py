@@ -59,8 +59,30 @@ class APIConfig(BaseModel):
 class DataInput(BaseModel):
     movie_id:int=Field(ge=1, le=3953)
 
+class DataInputCS(BaseModel):
+    gender:str
+    age:int
+    @field_validator('gender')
+    @classmethod
+    def check_gender(cls, gender):
+        g = gender.lower()
+        possible_input = ['female', 'f', 'male', 'm']
+        possible_input.extend([pi.upper() for pi in possible_input])
+        print(possible_input)
+        if g not in possible_input:
+            raise ValueError(f'Gender must be in {possible_input}')
+        return g
+
+    @field_validator('age')
+    @classmethod
+    def check_age(cls, age):
+        possible_input = [1, 18, 25, 35, 45, 50, 56]
+        if age not in possible_input:
+            raise ValueError(f'Age must be in {possible_input}')
+        return age
+
 class PredictOutput(BaseModel):
     movie_id:int=Field(ge=1, le=3953)
     title:str
     genre:str
-    cos_sim:float=Field(ge=-1, le=1)
+    score:float
