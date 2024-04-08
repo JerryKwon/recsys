@@ -36,7 +36,7 @@ emb_movies = model.embedding.weight[dict_col_offset["movie_id"]: dict_col_offset
 fm = APIRouter(prefix='/models/fm')
 
 @fm.get('/',tags=['fm'])
-async def start_ncf():
+async def start_fm():
     return {'msg': 'Here is FM'}
 
 @fm.post('/prediction', tags=['fm'], response_model=List[PredictOutput])
@@ -93,13 +93,13 @@ async def predict_fm_cs(data_request: DataInputCS):
     k = 20
 
     score_movies = sorted(rankings.detach().cpu().numpy(), reverse=True)[:k]
-    rec_movies = rankings.detach().cpu().numpy().argsort()[::-1][:k]
+    rec_movies = rankings.detach().cpu().numpy().argsort()[::-1][:k]+1
 
     dict_rec_score = dict(zip(rec_movies, score_movies))
 
     df_rec_movies = movies.loc[movies["movie_id"].isin(rec_movies)]
 
-    df_rec_movies["score"] = df_rec_movies.movie_id.apply(lambda x:dict_rec_score[x-1])
+    df_rec_movies["score"] = df_rec_movies.movie_id.apply(lambda x:dict_rec_score[x])
     df_rec_movies = df_rec_movies.sort_values(by="score",ascending=False).copy()
 
     list_pred_output = []
